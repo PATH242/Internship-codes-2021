@@ -135,8 +135,6 @@ def readData():
 
 
 def start():
-    print("this thing started\n")
-
     readData()
     makeInitialPopulation()
     global numberOfGenerations
@@ -149,7 +147,7 @@ def start():
         selectAdvancedIndividuals()
         if(population[0].fitness<=minimumAcceptedErrorValue):
             break
-    print(str(numberOfGenerations) + " has the best individual: " + str(population[0]))
+    print("the total fitness is: " +str(population[0].fitness))
     plt.scatter(d,e, label="actualValues", color="green", marker=".", s=10)
 
 
