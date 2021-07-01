@@ -1,0 +1,169 @@
+import random
+import matplotlib.pyplot as plt
+import numpy as np
+
+from typing import List, Any, Union
+
+##the constants used
+generationSize=10
+probabilityOfMutation=20
+probabilityOfMating=60
+N=5e3+5
+mutationValues=[-1,1]
+##n is size of the desiredString, numberOfGenerations is a counter to count the generations made so far
+n=0
+minimumAcceptedErrorValue= 100
+numberOfGenerations: int=0
+##e[N] is an array for the errors going to be processed
+e=[]
+d=[]
+population= list()
+
+class Individual:
+    ##fitness is the error value, the lower the fitness the better
+    def __init__(self, x,y):
+        self.genes= [x,y];
+        self.fitness= self.calculateFitness()
+
+    def  mate(self, temp):
+        x= random.randint(0,50)
+        y= random.randint(0,50)
+        child= Individual(x,y)
+        child.genes[0]= (self.genes[0]+temp.genes[0])/2.0
+        child.genes[1]=(self.genes[1]+temp.genes[1])/2.0
+        child.mutate()
+        child.fitness= child.calculateFitness()
+        return child
+
+
+    def mutate(self):
+        probability= random.randint(0,99)
+        if(probability<probabilityOfMutation):
+            self.genes[0]+= mutationValues[random.randint(0,1)]*random.randint(0,10)
+
+        probability= random.randint(0,99)
+        if(probability<probabilityOfMutation):
+            self.genes[1]+= mutationValues[random.randint(0,1)]*random.randint(0,10)
+
+
+    def calculateFitness(self):
+        temp= 0.0
+        for i in range(0,n):
+            tempDif= self.genes[0]+ self.genes[1]*d[i]
+            tempDif-=e[i]
+            temp+= (tempDif)*(tempDif)
+        return temp
+
+    def __str__(self):
+        return (str(self.genes[0])+" "+str(self.genes[1])+" with fitness of: "+str(self.fitness)+"\n")
+
+    def __lt__(self, right):
+        return self.fitness < right.fitness
+    def __gt__(self, right):
+        return self.fitness > right.fitness
+
+
+def makeInitialPopulation():
+    global population
+    for i in range(generationSize):
+        x= random.randint(i,40+i)
+        y= random.randint(i,40+i)
+        I= Individual(x,y)
+        population.append(I)
+
+
+def selectAdvancedIndividuals():
+    global population
+    ##sort to have least fit regression line first
+
+    population.sort()
+    population.reverse()
+
+    newPopulation= list()
+    temp = Individual(random.randint(0,50),random.randint(0,50))
+    probability = 0
+    ##mating with giving most similar higher probability in mating
+    i= len(population)-1
+    while(i>=0):
+        j= i-1
+        while(j>=0):
+            probability= (random.randint(0,99))+i*2 ##give higher probability in mating to more similar individuals
+            if(probability>=probabilityOfMating):
+                temp= population[i].mate(population[j])
+                newPopulation.append(temp)
+
+            j-=1
+
+        i-=1
+
+    ##sort to have least similar last
+    newPopulation.sort()
+
+    ##eliminate from the new population so that it suits the generation size
+    while(len(newPopulation)>generationSize):
+        newPopulation.pop()
+
+    population= newPopulation
+
+
+def readData():
+    global n
+    n=195
+    data = open('dataIN.txt', 'r')
+    lines = data.readlines()
+    data.close()
+    base: int = ord('0')
+    top: int = 0
+    for i in range(195):
+        j= 0
+        temp=0
+        temp2=0
+        while j<len(lines[i]):
+            if(lines[i][j]=='\t'):
+                break
+            temp*=10
+            top= ord(lines[i][j])
+            temp+= (top-base)
+            j+=1
+        j+=1
+        while j<len(lines[i]):
+            temp2*=10
+            top = ord(lines[i][j])
+            temp2 += (top - base)
+            j+=1
+        e.append(temp)
+        d.append(temp)
+
+
+def start():
+    print("this thing started\n")
+
+    readData()
+    makeInitialPopulation()
+    global numberOfGenerations
+    selectAdvancedIndividuals()
+
+
+    for i in range(1000):
+        numberOfGenerations +=1
+        ##print(str(numberOfGenerations) + " has the best individual: "+str(population[0]) )
+        selectAdvancedIndividuals()
+        if(population[0].fitness<=minimumAcceptedErrorValue):
+            break
+    print(str(numberOfGenerations) + " has the best individual: " + str(population[0]))
+    plt.scatter(d,e, label="actual values", color="green",
+                marker=".", s=10)
+
+
+    # Creating vectors X and Y
+    x = np.linspace(-100, 500, 100)
+    y= population[0].genes[0] + population[0].genes[1] * x
+    plt.plot(x,y,label= "expected")
+    plt.xlabel('days')
+    plt.ylabel('errors')
+    plt.title('visualization')
+
+    plt.show()
+    return
+
+start()
