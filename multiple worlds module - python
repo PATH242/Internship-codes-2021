@@ -2,7 +2,6 @@ import random
 import matplotlib.pyplot as plt
 import numpy as np
 
-from typing import List, Any, Union
 
 ##the constants used
 generationSize=10
@@ -11,9 +10,9 @@ probabilityOfMating=60
 mutationValues=[-1,1]
 ##n is size of the data array, numberOfGenerations is a counter to count the generations made so far
 n=0
-minimumAcceptedErrorValue= 49
+minimumAcceptedErrorValue= 49 ##Error is fitness
 numberOfGenerations: int=0
-##e[N] is an array for the errors going to be processed and d[N] is for days
+##e[N] is a list for the errors going to be processed and d[N] is for days
 e=[]
 d=[]
 totalFitness=0
@@ -21,10 +20,12 @@ population= list()
 
 class Individual:
     ##fitness is the error value, the lower the fitness the better
+    ##genes are the constants of the line equation: genes[0] + genes[1] * x
     def __init__(self, x,y):
-        self.genes= [x,y];
+        self.genes= [x,y]
         self.fitness= self.calculateFitness()
 
+    ##after mating, mutation could occure, and then fitness is calculated
     def  mate(self, temp):
         x= random.randint(0,50)
         y= random.randint(0,50)
@@ -35,7 +36,7 @@ class Individual:
         child.fitness= child.calculateFitness()
         return child
 
-
+    ##mutation occurs with the probability of mutation specified above
     def mutate(self):
         probability= random.randint(0,99)
         if(probability<probabilityOfMutation):
@@ -45,7 +46,10 @@ class Individual:
         if(probability<probabilityOfMutation):
             self.genes[1]+= mutationValues[random.randint(0,1)]*random.randint(0,10)
 
-
+    ##fitness is the difference between the expected e[i] and the actual e[i] squared
+    """if at any point, we find that our equation fits at least 10 points optimally,
+        we plot that line as a separate world and then continue trying to generate the 
+        optimal line for the rest of the points"""
     def calculateFitness(self):
         temp= 0.0
         global n
@@ -68,40 +72,38 @@ class Individual:
             temp+= (tempDif)*(tempDif)
         return temp
 
+    ##to output the individual when needed
     def __str__(self):
         return (str(self.genes[0])+" "+str(self.genes[1])+" with fitness of: "+str(self.fitness)+"\n")
 
+    ##for comparison used in sorting, we define lower than and greater than operators
     def __lt__(self, right):
         return self.fitness < right.fitness
     def __gt__(self, right):
         return self.fitness > right.fitness
 
-
+##we create a random initial population to start with
 def makeInitialPopulation():
     global population
     for i in range(generationSize):
-        x= random.randint(i,40+i)
-        y= random.randint(i,40+i)
-        I= Individual(x,y)
-        population.append(I)
+        population.append(Individual(random.randint(i, 40 + i), random.randint(i, 40 + i)))
 
 
 def selectAdvancedIndividuals():
     global population
     ##sort to have least fit regression line first
-
     population.sort()
     population.reverse()
-
+    ##make a new population to store children
     newPopulation= list()
     temp = Individual(random.randint(0,50),random.randint(0,50))
     probability = 0
-    ##mating with giving most similar higher probability in mating
+    ##mating with giving the most fit a higher probability in mating
     i= len(population)-1
     while(i>=0):
         j= i-1
         while(j>=0):
-            probability= (random.randint(0,99))+i*2 ##give higher probability in mating to more similar individuals
+            probability= (random.randint(0,99))+i*2
             if(probability>=probabilityOfMating):
                 temp= population[i].mate(population[j])
                 newPopulation.append(temp)
@@ -111,7 +113,7 @@ def selectAdvancedIndividuals():
         i-=1
     for i in newPopulation:
         i.fitness= i.calculateFitness()
-    ##sort to have least similar last
+    ##sort to have most fit first
     newPopulation.sort()
 
     ##eliminate from the new population so that it suits the generation size
@@ -120,7 +122,7 @@ def selectAdvancedIndividuals():
 
     population= newPopulation
 
-
+##read data from file and store it in lists
 def readData():
     global n
     n=195
@@ -163,8 +165,10 @@ def start():
     for i in range(1000):
         numberOfGenerations +=1
         selectAdvancedIndividuals()
+        ##if we represented all our data, break
         if(len(e)==0):
             break
+    ##if there's still one more line we didn't represent, represent it
     if(len(e)>0):
         a = np.linspace(d[0], d[len(e)-1], 100)
         b = population[0].genes[0] + population[0].genes[1] * a
@@ -176,8 +180,7 @@ def start():
             totalFitness+= (temp*temp)
 
 
-    print("total fitness is: ")
-    print(totalFitness)
+    print("total fitness is: "+str(totalFitness))
     plt.show()
 
     return
