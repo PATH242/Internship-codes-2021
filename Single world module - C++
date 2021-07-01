@@ -18,8 +18,8 @@ mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
 
 ///the constants used
 const int generationSize=10,probabilityOfMutation=20,probabilityOfMating=60,N=5e3+5,mutationValues[2]={1,-1};
-int n,numberOfGenerations; ///n is size of the desiredString, numberOfGenerations is a counter to count the generations made so far
-double e[N],d[N]; ///e[N] is an array for the errors going to be processed
+int n,numberOfGenerations; ///n is size of the data array, numberOfGenerations is a counter to count the generations made so far
+double e[N],d[N]; ///e[N] is an array for the errors going to be processed, d[N] is for days
 
 class Individual{
 public:
