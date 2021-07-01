@@ -8,13 +8,12 @@ from typing import List, Any, Union
 generationSize=10
 probabilityOfMutation=20
 probabilityOfMating=60
-N=5e3+5
 mutationValues=[-1,1]
-##n is size of the data array, numberOfGenerations is a counter to count the generations made so far
+##n is size of the desiredString, numberOfGenerations is a counter to count the generations made so far
 n=0
 minimumAcceptedErrorValue= 100
 numberOfGenerations: int=0
-##e[N] is an array for the errors going to be processed and d[N] is for days
+##e[N] is an array for the errors going to be processed
 e=[]
 d=[]
 population= list()
@@ -151,17 +150,16 @@ def start():
         if(population[0].fitness<=minimumAcceptedErrorValue):
             break
     print(str(numberOfGenerations) + " has the best individual: " + str(population[0]))
-    plt.scatter(d,e, label="actual values", color="green",
-                marker=".", s=10)
+    plt.scatter(d,e, label="actualValues", color="green", marker=".", s=10)
 
 
     # Creating vectors X and Y
-    x = np.linspace(-100, 500, 100)
+    x = np.linspace(0, 600, 100)
     y= population[0].genes[0] + population[0].genes[1] * x
     plt.plot(x,y,label= "expected")
     plt.xlabel('days')
     plt.ylabel('errors')
-    plt.title('visualization')
+    plt.title('visualization of data')
 
     plt.show()
     return
