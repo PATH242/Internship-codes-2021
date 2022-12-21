@@ -4,6 +4,7 @@ Genetic algorithm programs used with linear regression to predict the relation b
 The multiple worlds module performs better than the single world module since it's constructed from multiple single worlds: each world being cut off at the best fitting point.
 
 Example:
+
 *Single world:*
 ![single world](https://user-images.githubusercontent.com/52926455/208948013-9e0451e5-be5c-4e05-9b77-d8fca3def70a.png)
 *Multiple worlds:*
